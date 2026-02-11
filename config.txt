@@ -1,0 +1,20 @@
+####
+# Configuration that tells the parent process how to start the child process.
+# Where this file is (it not being a resource) is communicted to the parent
+# process with the --config=<path> option.
+####
+
+# The directory in which the child process will be started.
+
+workDir      = /home/someuser
+
+# The uberjar which contains all the code for the child process.
+# That uberjar is created with the aven target "clean install"
+
+childJarFile = /home/someuser/parent_child_ipc-1.0.jar
+
+# The Java executable used to run the child process.
+# Asuming at least version 21 because that is the target bytecode version
+# stipulated in the pom.xml
+
+javaExe      = /usr/local/java/jdk22_64_adopt/bin/java
