@@ -1,5 +1,7 @@
 # simple_parent_child_ipc_example
 
+Everything is in the namespace `name.pomelo.parent_child_ipc`
+
 Kotlin code to start a child process, with the parent process then talking with the child via STDIN/STDOUT.
 
 Both child process and parent process are implemented as finite state machines that send one-liners to each other.
