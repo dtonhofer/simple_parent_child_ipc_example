@@ -29,13 +29,17 @@ Here is the general idea concerning the architecture:
   references by the state instances. If the ancillary data changes (e.g. there is a counter incrementation), then a fresh anciallary data
   instance based on the existing one is created and given to the next state instance's constructor. This yields a rather elegant solution, code-wise. 
 
-## The parent state machine:
+## The parent state machine
 
 ![parent state machine](images/parent_process_state_machine.png)
 
-### The child state machine:
+### The child state machine
 
 ![child state machine](images/child_process_state_machine.png)
+
+## The class hierarchy of states
+
+![class hierarchy of states](images/class_hierarchy_of_states.png)
 
 ## Notes
 
@@ -50,6 +54,101 @@ Here is the general idea concerning the architecture:
   - The config file by giving `--config=<path/to/config/file>` as option
   - Whether you want or generate random "accidents" in the 
 - You will see the log whereby the parent process asks the child sequentially for its arguments and receives the `A`, `B`, `C` in turn, finally printing the received string vector to STDOUT.
+
+Start the parent-child pair. The strings "A", "B", "C" will be communicated from the child process to the parent process over piped I/O:
+
+java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.0.jar --config=~/simple_parent_child_ipc_example/config.txt -- A B C
+
+As above, but there will be "accidents" (random closing of STDIN or STDOUT and unexpected strings in the exchange between parent and child, for testing purposes)
+
+java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.0.jar --config=~/simple_parent_child_ipc_example/config.txt --with-child-accidents --with-parent-accident -- A B C
+
+You can run the child in isolation and talk to it from the console. Consult the child state machine diagram to learn how to perform the exchange.
+
+java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.0.jar --config=~/simple_parent_child_ipc_example/config.txt --child
+
+## An example run
+
+Running:
+
+```
+java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.0.jar --config=~/simple_parent_child_ipc_example/config.txt -- A B C
+```
+
+We get this:
+
+```
+INFO[PARENT]: argvAnalysisResult: withChildAccidents = false, discardedArgv = [], argsBeyondDashDash = [A, B, C]
+INFO[PARENT]: Entering state: SendQuery
+INFO[PARENT]: SendQuery: sending 'ARG?'
+INFO[PARENT]: Parent to child: 'ARG?[0a]'
+INFO[PARENT]: Next state will be: RecvAnswer
+INFO[PARENT]: Entering state: RecvAnswer
+CHILD STDERR: INFO[CHILD]: argvAnalysisResult: withChildAccidents = false, discardedArgv = [], argsBeyondDashDash = [A, B, C]
+CHILD STDERR: INFO[CHILD]: Entering state: RecvQuery
+CHILD STDERR: INFO[CHILD]: RecvQuery: received 'ARG?'
+CHILD STDERR: INFO[CHILD]: Next state will be: SendArg
+CHILD STDERR: INFO[CHILD]: Entering state: SendArg
+CHILD STDERR: INFO[CHILD]: SendArg: sending 'ARG: 0 = 'A''
+CHILD STDERR: INFO[CHILD]: Next state will be: RecvQuery
+CHILD STDERR: INFO[CHILD]: Entering state: RecvQuery
+INFO[PARENT]: RecvAnswer: received 'ARG: 0 = 'A''
+INFO[PARENT]: Next state will be: SendQuery
+INFO[PARENT]: Entering state: SendQuery
+INFO[PARENT]: SendQuery: sending 'ARG?'
+INFO[PARENT]: Parent to child: 'ARG?[0a]'
+INFO[PARENT]: Next state will be: RecvAnswer
+INFO[PARENT]: Entering state: RecvAnswer
+CHILD STDERR: INFO[CHILD]: RecvQuery: received 'ARG?'
+CHILD STDERR: INFO[CHILD]: Next state will be: SendArg
+CHILD STDERR: INFO[CHILD]: Entering state: SendArg
+CHILD STDERR: INFO[CHILD]: SendArg: sending 'ARG: 1 = 'B''
+INFO[PARENT]: RecvAnswer: received 'ARG: 1 = 'B''
+CHILD STDERR: INFO[CHILD]: Next state will be: RecvQuery
+CHILD STDERR: INFO[CHILD]: Entering state: RecvQuery
+INFO[PARENT]: Next state will be: SendQuery
+INFO[PARENT]: Entering state: SendQuery
+INFO[PARENT]: SendQuery: sending 'ARG?'
+INFO[PARENT]: Parent to child: 'ARG?[0a]'
+INFO[PARENT]: Next state will be: RecvAnswer
+INFO[PARENT]: Entering state: RecvAnswer
+CHILD STDERR: INFO[CHILD]: RecvQuery: received 'ARG?'
+CHILD STDERR: INFO[CHILD]: Next state will be: SendArg
+CHILD STDERR: INFO[CHILD]: Entering state: SendArg
+CHILD STDERR: INFO[CHILD]: SendArg: sending 'ARG: 2 = 'C''
+INFO[PARENT]: RecvAnswer: received 'ARG: 2 = 'C''
+CHILD STDERR: INFO[CHILD]: Next state will be: RecvQuery
+CHILD STDERR: INFO[CHILD]: Entering state: RecvQuery
+INFO[PARENT]: Next state will be: SendQuery
+INFO[PARENT]: Entering state: SendQuery
+INFO[PARENT]: SendQuery: sending 'ARG?'
+INFO[PARENT]: Parent to child: 'ARG?[0a]'
+INFO[PARENT]: Next state will be: RecvAnswer
+INFO[PARENT]: Entering state: RecvAnswer
+CHILD STDERR: INFO[CHILD]: RecvQuery: received 'ARG?'
+CHILD STDERR: INFO[CHILD]: Next state will be: SendDone
+CHILD STDERR: INFO[CHILD]: Entering state: SendDone
+INFO[PARENT]: RecvAnswer: received 'DONE'
+CHILD STDERR: INFO[CHILD]: SendDone: sending 'DONE'
+INFO[PARENT]: Next state will be: SendBye
+CHILD STDERR: INFO[CHILD]: Next state will be: RecvBye
+CHILD STDERR: INFO[CHILD]: Entering state: RecvBye
+INFO[PARENT]: Entering state: SendBye
+INFO[PARENT]: SendBye: sending 'BYE'
+INFO[PARENT]: Parent to child: 'BYE[0a]'
+CHILD STDERR: INFO[CHILD]: RecvBye: received 'BYE'
+INFO[PARENT]: Next state will be: Done
+INFO[PARENT]: Final state: Done
+CHILD STDERR: INFO[CHILD]: Next state will be: Done
+CHILD STDERR: INFO[CHILD]: Final state: Done
+INFO: Child process hasn't exited yet - waiting 10 ms.
+CHILD STDERR: [[[ CHILD STDERR CLOSED ]]]
+Final parent state   : Done
+Child exit value     : 0
+argv[0] = 'A'
+argv[1] = 'B'
+argv[2] = 'C'
+```
 
 ### Example config file
 
@@ -77,13 +176,6 @@ childJarFile = $HOME/simple_parent_child_ipc_example/target/parent_child_ipc-1.0
 
 javaExe      = /usr/local/java/jdk22_64_adopt/bin/java```
 ```
-
-
-
-Here is the class hierarchy of the states for the "child process state machine":
-
-![class hierarchy of child states](images/class_hierarchy_of_child_states.png)
-
 
 
 
