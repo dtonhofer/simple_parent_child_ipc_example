@@ -8,7 +8,7 @@ import name.pomelo.parent_child_ipc.helpers.Logging.mangleString
 class SendArg(val managedChildData: ChildStateMachineData) : Send(managedChildData) {
 
     override fun buildLine(): String {
-        val arg = managedChildData.argv[managedChildData.argIndex]
+        val arg = managedChildData.argvToTransmit[managedChildData.argIndex]
         val mangledArg = mangleString(arg, -1, keepNewlines = false)
         return "ARG: ${managedChildData.argIndex} = '$mangledArg'"
     }

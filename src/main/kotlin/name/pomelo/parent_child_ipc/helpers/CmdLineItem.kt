@@ -70,9 +70,17 @@ class CmdLineItem(val type: Type, val keyword: String?, val value: String?) {
     // by the programmer. The programmer knows exactly what it is supposed to be!
     // Thus, we can set the "type".
 
-    enum class Type { LONG_OPTION, SHORT_OPTION, VALUE }
+    enum class Type { LONG_OPTION, SHORT_OPTION, VALUE, DASH_DASH }
+
+    // Special constructor for pure "values". Strings like "-x" or "--x" will be
+    // interpreted as values, not options.
 
     constructor (value: String) : this(Type.VALUE, null, value)
+
+    // Special constructor for keyword-value pairs. Kewyord is something like "-x" or "--x"
+    // (with the dashes), and the value is arbitrary, and seens as "missing" if null.
+    // This would be printed as -x, -xFoo, --x Foo, --x=Foo
+
     constructor (keyword: String, value: String?) : this(optionTypeFromKeyword(keyword), keyword, value)
 
     companion object {
@@ -82,7 +90,8 @@ class CmdLineItem(val type: Type, val keyword: String?, val value: String?) {
         // Never returns "VALUE", looks at whether the key starts with "-" or "--"
 
         fun optionTypeFromKeyword(keyword: String): Type {
-            return if (dualDashRegex.matches(keyword)) Type.LONG_OPTION
+            return if (keyword == "--") Type.DASH_DASH
+            else if (dualDashRegex.matches(keyword)) Type.LONG_OPTION
             else if (singleDashRegex.matches(keyword)) Type.SHORT_OPTION
             else error("Keyword '$keyword' does not start with '--' or '-'")
         }
@@ -138,7 +147,9 @@ class CmdLineItem(val type: Type, val keyword: String?, val value: String?) {
                     listOf(keyword!!, value)
                 }
             }
-
+            Type.DASH_DASH -> {
+                listOf("--")
+            }
             Type.VALUE -> {
                 listOf(value!!)
             }

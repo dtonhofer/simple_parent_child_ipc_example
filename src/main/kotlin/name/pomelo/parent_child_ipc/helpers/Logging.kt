@@ -26,6 +26,10 @@ object Logging {
         System.err.println("ERROR${mangleMarker(marker)}: $msg")
     }
 
+    fun logWarn(msg: String, marker: String) {
+        System.err.println("WARN${mangleMarker(marker)}: $msg")
+    }
+
     fun logErr(stateDesc: StateDesc, msg: String, marker: String) {
         System.err.println("ERROR${mangleMarker(marker)}: ${stateDesc::class.simpleName}: $msg")
     }

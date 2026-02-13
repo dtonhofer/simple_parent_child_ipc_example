@@ -11,7 +11,7 @@ class RecvQuery(val managedChildData: ChildStateMachineData) : Recv(managedChild
 
     override fun handleLine(line: String): StateDesc {
         return if (line == "ARG?") {
-            if (managedChildData.argIndex < managedChildData.argv.size) {
+            if (managedChildData.argIndex < managedChildData.argvToTransmit.size) {
                 SendArg(managedChildData)
             } else {
                 SendDone(managedChildData)
