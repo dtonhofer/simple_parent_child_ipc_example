@@ -45,37 +45,49 @@ Here is the general idea concerning the architecture:
 
 - Everything is in the namespace `name.pomelo.parent_child_ipc`
 
-## How to run this
+## How to run the program
 
 - Compile an "überjar" by running the maven target "clean install". 
-- Edit the configuration file, here named "config.txt", indicating the "überjar" just created, the Java VM executable (as the POM says to compile to version 21,
-  the java VM must be at least version 21) and the working directory for the child process (see below for an example)
-- Start the parent process, indicating:
-  - The config file by giving `--config=<path/to/config/file>` as option
-  - Whether you want or generate random "accidents" in the 
-- You will see the log whereby the parent process asks the child sequentially for its arguments and receives the `A`, `B`, `C` in turn, finally printing the received string vector to STDOUT.
+- Edit the configuration file, here named `config.txt` (see below for an example), indicating
+   - The "überjar" just created,
+   - The Java VM executable (as the POM says to compile to version 21, the java VM must be at least version 21) and
+   - The working directory for the child process. That would generally simply be the user's home directory.
+- Start the parent process, indicating the following on the command line:
+  - The config file by giving option `--config=<path/to/config/file>`,
+  - Whether you want or generate random "accidents" (random STDIN/STDOUT closure, unexpected lines) in the child or the parent.
+  - The arguments that the child process shall send to the parent process over piped I/O on request, separated from the other arguments with the double dash `--`.
+   
+You will see the log (on STDERR) whereby the parent process asks the child sequentially for its arguments, finally printing the received strings to STDOUT.
 
-Start the parent-child pair. The strings "A", "B", "C" will be communicated from the child process to the parent process over piped I/O:
+### Examples
 
+Start the parent-child pair. The strings `A`, `B`, `C` will be communicated to the parent process by the child process:
+
+```
 java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.0.jar --config=~/simple_parent_child_ipc_example/config.txt -- A B C
+```
 
-As above, but there will be "accidents" (random closing of STDIN or STDOUT and unexpected strings in the exchange between parent and child, for testing purposes)
+As above, but there will be "accidents" (random STDIN/STDOUT closure, unexpected lines), exercising error-hamndling behaviour:
 
+```
 java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.0.jar --config=~/simple_parent_child_ipc_example/config.txt --with-child-accidents --with-parent-accident -- A B C
+```
 
-You can run the child in isolation and talk to it from the console. Consult the child state machine diagram to learn how to perform the exchange.
+You can also run the child in isolation and talk to it directly from the console (playing parent) by passing the argument `--child`. Consult the state machine diagrams to find out how to perform the exchange.
 
-java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.0.jar --config=~/simple_parent_child_ipc_example/config.txt --child
+```
+java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.0.jar --config=~/simple_parent_child_ipc_example/config.txt --child -- A B C
+```
 
 ## An example run
 
-Running:
+Running the following to set up the parent/child processes, and make the child, in response to a sequence of queries by the parent, respond with values `A`, `B`, `C` in turn, 
 
 ```
 java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.0.jar --config=~/simple_parent_child_ipc_example/config.txt -- A B C
 ```
 
-We get this:
+We see the following in the log:
 
 ```
 INFO[PARENT]: argvAnalysisResult: withChildAccidents = false, discardedArgv = [], argsBeyondDashDash = [A, B, C]
@@ -150,7 +162,9 @@ argv[1] = 'B'
 argv[2] = 'C'
 ```
 
-### Example config file
+## An example "config file"
+
+The reading functions understand that `$HOME` and `~` stand for the "user home".
 
 ```
 ####
@@ -176,7 +190,3 @@ childJarFile = $HOME/simple_parent_child_ipc_example/target/parent_child_ipc-1.0
 
 javaExe      = /usr/local/java/jdk22_64_adopt/bin/java```
 ```
-
-
-
-
