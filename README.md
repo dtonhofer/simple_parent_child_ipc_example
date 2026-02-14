@@ -57,7 +57,8 @@ Here is the general idea concerning the architecture:
    - The working directory for the child process. That would generally simply be the user's home directory.
 - Start the parent process, indicating the following on the command line:
   - The config file by giving option `--config=<path/to/config/file>`,
-  - Whether you want or generate random "accidents" (random STDIN/STDOUT closure, unexpected lines) in the child or the parent.
+  - Whether you want or generate random "accidents" (random STDIN/STDOUT closure, unexpected lines) in the child or the parent, with the
+    options `--with-child-accidents` and `--with-parent-accidents`.
   - The arguments that the child process shall send to the parent process over piped I/O on request, separated from the other arguments with the double dash `--`.
    
 You will see the log (on STDERR) whereby the parent process asks the child sequentially for its arguments, finally printing the received strings to STDOUT.
@@ -73,7 +74,7 @@ java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.0.jar --co
 As above, but there will be "accidents" (random STDIN/STDOUT closure, unexpected lines), exercising error-hamndling behaviour:
 
 ```
-java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.0.jar --config=~/simple_parent_child_ipc_example/config.txt --with-child-accidents --with-parent-accident -- A B C
+java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.0.jar --config=~/simple_parent_child_ipc_example/config.txt --with-child-accidents --with-parent-accidents -- A B C
 ```
 
 You can also run the child in isolation and talk to it directly from the console (playing parent) by passing the argument `--child`. Consult the state machine diagrams to find out how to perform the exchange.
