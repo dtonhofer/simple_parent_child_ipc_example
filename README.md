@@ -10,24 +10,27 @@ Here is the general idea concerning the architecture:
 
 ## Features
 
-- Argv processing for the parent and child process is based on locally programmed-out finite state machines.
-  The alternative would have been to use an external library, which would have allowed a more declarative approach.
+- Argv (i.e. command-line argument) processing for both parent process and child process is based on explicitly programmed-out finite state machines.
+  The alternative would have been to use an third-party library (for example, [picocli](https://picocli.info/)), which would have allowed a more declarative approach.
   However, argv processing is simple enough and Kotlin is expressive enough that we can bake specialized code directly.
-- Parent process and child process behaviour are based on finite state machines that send one-liners to each other over piped STDIN/STDOUT.
-  Implementation-wise, "states" are instances from a class hierarchy, each non-abstract class standing for a possible state. The class
-  hierarchy allows factoring out common behavior into superclasses, and also to partition the set of states into the partition of "final states",
-  "states during which the process listens for data on STDIN", "states during which the process listens for data on STDOUT" etc. 
-  An instance representing a state exists for a single step of the finite state machine. It is thrown away and replaced by a fresh instance
-  representing the follower state when, conceptually, "edge traversal" happens. Ever "state class" has an `onEntry()` method which is called
-  by the state machine runner (a very small loop of 3 lines) immediately after the state instance has been created. Any actions that happen
-  "during that state" (a fuzzy concept, really, as it may not be immediately clear when a state conceptually "starts" or "ends", one has to
-  make some choices that may not be in accord with formalisms like UML) is performed in the `onEntry()` method. In particular, receiving
-  a line from STDIN (blocking as long has it hasn't fully arrived), sending a line to STDOUT (blocking if the output buffer is full) and
-  deciding what shall be the next state (same as deciding what outgoing edge to travers). `onEntry()` simple returns the next state instance
-  to the state machine runner, which will then call `onEntry()` on it, and the cycle repeats. Any ancillary data (counters, streams) that the
-  state machine needs to handle in addition to the central representation of in what state it is now is kept in dedicated immutable instances
-  references by the state instances. If the ancillary data changes (e.g. there is a counter incrementation), then a fresh anciallary data
-  instance based on the existing one is created and given to the next state instance's constructor. This yields a rather elegant solution, code-wise. 
+- Both parent process and child process behaviour is based on finite state machines that send one-liners to each other over piped STDIN/STDOUT.
+  - "States" are instances from a class hierarchy, each non-abstract class in that hierarchy standing for a possible state. The class
+    hierarchy allows to factor out common behavior into superclasses, and also to partition the set of states into "final states",
+    "states during which the process listens for data on STDIN", "states during which the process listens for data on STDOUT" etc. 
+  - An actual instance representing "being in a state at a certain time" exists for a single step of the finite state machine.
+    The instance is thrown away and replaced by a fresh instance that represents the follower state whenever, conceptually, "edge traversal" happens.
+  - Every "state class" has an `onEntry()` method which is called by the state machine runner (a very small loop of 3 lines) immediately
+    after the state instance has been created. Actions that  happen "during that state" (a fuzzy concept, really, as it may not be entirely clear
+    when, conceptually, a state "starts" or "ends") are performed in the `onEntry()` method. In particular, receiving a line from STDIN (but blocking
+    as long has it hasn't fully arrived), sending a line to STDOUT (but blocking if the output buffer is full) and deciding what shall be the next state
+    are all done in `onEntry()`. `onEntry()` simply instantiates and returns the next state instance to the state machine runner. The state machine
+    runner will then call `onEntry()` on that instance, and the cycle repeats.
+  - Any ancillary data (counters, the reader and write on top of streams, timestampe etc.) that the state machine needs to maintain in addition
+    to the central representation of state, is kept in dedicated immutable instances, referenced by state instances. If the ancillary data changes
+    (e.g. there is a counter incrementation), then a fresh anciallary data instance based on the existing one is created and passed to the next
+    state instance's constructor. This yields a rather elegant solution, code-wise. Previously I was focusing on representing the state as a
+    "state variable" that may take on a value from an enum and ancillary data as a bunch of variables held by a the class representing the state
+    machine, which also had per-state processing methods. But that was much messier.
 
 ## The parent state machine
 
