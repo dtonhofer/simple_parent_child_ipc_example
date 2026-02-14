@@ -29,8 +29,8 @@ Here is the general idea concerning the architecture:
     to the central representation of state, is kept in dedicated immutable instances, referenced by state instances. If the ancillary data changes
     (e.g. there is a counter incrementation), then a fresh anciallary data instance based on the existing one is created and passed to the next
     state instance's constructor. This yields a rather elegant solution, code-wise. Previously I was focusing on representing the state as a
-    "state variable" that may take on a value from an enum and ancillary data as a bunch of variables held by a the class representing the state
-    machine, which also had per-state processing methods. But that was much messier.
+    "state variable" that would take on a value from an enum type, and ancillary data as a bunch of variables held by a the class representing
+    the state machine. That class also had per-state processing methods. But that yielded a much messier bunch of code.
 
 ## The parent state machine
 
