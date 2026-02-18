@@ -68,19 +68,19 @@ You will see the log (on STDERR) whereby the parent process asks the child seque
 Start the parent-child pair. The strings `A`, `B`, `C` will be communicated to the parent process by the child process:
 
 ```
-java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.0.jar --config=~/simple_parent_child_ipc_example/config.txt -- A B C
+java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.1.jar --config=~/simple_parent_child_ipc_example/config.txt -- A B C
 ```
 
 As above, but there will be "accidents" (random STDIN/STDOUT closure, unexpected lines), exercising error-hamndling behaviour:
 
 ```
-java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.0.jar --config=~/simple_parent_child_ipc_example/config.txt --with-child-accidents --with-parent-accidents -- A B C
+java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.1.jar --config=~/simple_parent_child_ipc_example/config.txt --with-child-accidents --with-parent-accidents -- A B C
 ```
 
 You can also run the child in isolation and talk to it directly from the console (playing parent) by passing the argument `--child`. Consult the state machine diagrams to find out how to perform the exchange.
 
 ```
-java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.0.jar --config=~/simple_parent_child_ipc_example/config.txt --child -- A B C
+java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.1.jar --config=~/simple_parent_child_ipc_example/config.txt --child -- A B C
 ```
 
 ## An example run
@@ -88,7 +88,7 @@ java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.0.jar --co
 Running the following to set up the parent/child processes, and make the child, in response to a sequence of queries by the parent, respond with values `A`, `B`, `C` in turn, 
 
 ```
-java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.0.jar --config=~/simple_parent_child_ipc_example/config.txt -- A B C
+java -jar ~/simple_parent_child_ipc_example/target/parent_child_ipc-1.1.jar --config=~/simple_parent_child_ipc_example/config.txt -- A B C
 ```
 
 We see the following in the log:
@@ -186,7 +186,7 @@ workDir = $HOME
 # The uberjar which contains all the code for the child process.
 # That uberjar is created with the aven target "clean install"
 
-childJarFile = $HOME/simple_parent_child_ipc_example/target/parent_child_ipc-1.0.jar
+childJarFile = $HOME/simple_parent_child_ipc_example/target/parent_child_ipc-1.1.jar
 
 # The Java executable used to run the child process.
 # Asuming at least version 21 because that is the target bytecode version

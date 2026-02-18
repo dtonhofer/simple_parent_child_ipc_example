@@ -4,9 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>pomelo.name</groupId>
+    <!-- reverse DNS form of the package name -->
+    <groupId>name.pomelo</groupId>
     <artifactId>parent_child_ipc</artifactId>
-    <version>1.0</version>
+    <!-- SNAPSHOT: “this is a development version, not a final release yet.” -->
+    <!-- A snapshot can be rebuilt and republished, and the “same” version may point to newer code later. -->
+    <version>1.1</version>
 
     <!-- To build the uberjar for the "child process" (via the "shade" plugin), run "clean install" maven target -->
 
